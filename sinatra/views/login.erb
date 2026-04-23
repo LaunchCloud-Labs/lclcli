@@ -1,0 +1,103 @@
+<% @page_title = 'Sign In' %>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-card-header">
+      <a href="/" class="auth-logo">
+        <span class="brand-lc">lc</span>
+      </a>
+      <h1 class="auth-title">Sign In</h1>
+      <p class="auth-subtitle">Access LaunchCore Command</p>
+    </div>
+
+    <% if @error %>
+      <div class="alert alert-error" role="alert">
+        <span class="alert-icon">✗</span>
+        <%= @error %>
+      </div>
+    <% end %>
+
+    <form class="auth-form" action="/login" method="POST" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          class="form-input"
+          placeholder="you@company.com"
+          required
+          autocomplete="email"
+          autofocus
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">
+          Password
+          <a href="#" class="form-label-link">Forgot password?</a>
+        </label>
+        <div class="input-group">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            placeholder="••••••••••••"
+            required
+            autocomplete="current-password"
+          />
+          <button type="button" class="input-toggle" onclick="togglePassword('password')" aria-label="Toggle password">
+            👁
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full btn-lg">
+        Sign In to LaunchCore
+      </button>
+    </form>
+
+    <div class="auth-divider">
+      <span>or</span>
+    </div>
+
+    <div class="auth-footer">
+      <p>Don't have an account? <a href="/signup" class="auth-link">Create one →</a></p>
+    </div>
+
+    <!-- CLI equivalent -->
+    <div class="cli-equivalent">
+      <span class="cli-eq-label">CLI equivalent</span>
+      <code class="cli-eq-cmd">lc /auth/login</code>
+    </div>
+  </div>
+
+  <!-- Side panel -->
+  <div class="auth-side">
+    <div class="auth-side-content">
+      <h2>CLI-First Platform</h2>
+      <p>Every action on this site executes the same <code>lc</code> binary command as your terminal.</p>
+      <div class="auth-side-terminal">
+        <div class="t-muted">$ lc /auth/login --json</div>
+        <div class="t-green">{</div>
+        <div class="t-muted">&nbsp;&nbsp;"status": <span class="t-green">"ok"</span>,</div>
+        <div class="t-muted">&nbsp;&nbsp;"message": <span class="t-green">"Login successful"</span></div>
+        <div class="t-green">}</div>
+      </div>
+      <ul class="auth-side-features">
+        <li>✓ RS256 JWT Authentication</li>
+        <li>✓ 4-Tier Auth Level System</li>
+        <li>✓ Zero-Trust Architecture</li>
+        <li>✓ Single SQLite Source of Truth</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePassword(id) {
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+</script>

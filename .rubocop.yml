@@ -1,0 +1,41 @@
+---
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.2
+  Exclude:
+    - 'vendor/**/*'
+    - 'spec/**/*'
+    - 'db/**/*'
+    - 'sinatra/public/**/*'
+
+Style/Documentation:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 60
+
+Metrics/ClassLength:
+  Max: 300
+
+Metrics/AbcSize:
+  Max: 40
+
+Metrics/CyclomaticComplexity:
+  Max: 20
+
+Metrics/BlockLength:
+  Exclude:
+    - 'lc.gemspec'
+    - 'Rakefile'
+
+Layout/LineLength:
+  Max: 120
+
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+
+Naming/MethodParameterName:
+  Enabled: false

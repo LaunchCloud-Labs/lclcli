@@ -1,0 +1,167 @@
+<% @page_title = 'Dashboard' %>
+<% user = @current_user %>
+
+<div class="dashboard">
+  <!-- ── Dashboard Header ── -->
+  <div class="dashboard-header">
+    <div class="dashboard-greeting">
+      <h1>
+        Welcome back, <span class="text-blurple"><%= user[:first_name] || user[:email].split('@').first %></span>
+      </h1>
+      <p class="dashboard-subtitle">
+        <span class="level-badge level-<%= user[:auth_level] %>">L<%= user[:auth_level] %></span>
+        <%= auth_levels[user[:auth_level]] %>
+        &nbsp;·&nbsp;
+        <%= LaunchCore::Config::USER_CLASSES[user[:user_class]] || user[:user_class] %>
+      </p>
+    </div>
+    <div class="dashboard-actions">
+      <button class="btn btn-ghost btn-sm" onclick="toggleTerminal()">
+        <span>&gt;_</span> Live Terminal
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Auth Level Progress ── -->
+  <div class="auth-progress-card">
+    <h3 class="card-title">Auth Level Progress</h3>
+    <div class="auth-level-track">
+      <% (1..4).each do |lvl| %>
+        <div class="level-step <%= lvl <= user[:auth_level] ? 'level-active' : 'level-locked' %>">
+          <div class="level-step-circle">L<%= lvl %></div>
+          <div class="level-step-label"><%= auth_levels[lvl] %></div>
+        </div>
+        <% if lvl < 4 %>
+          <div class="level-connector <%= lvl < user[:auth_level] ? 'connector-active' : '' %>"></div>
+        <% end %>
+      <% end %>
+    </div>
+    <div class="auth-upgrade-hints">
+      <% if user[:auth_level] < 2 %>
+        <a href="/settings/2fa" class="upgrade-hint upgrade-hint-blue">
+          → Enable 2FA to reach L2
+        </a>
+      <% end %>
+      <% if user[:auth_level] < 3 %>
+        <a href="/settings/kyc" class="upgrade-hint upgrade-hint-amber">
+          → Complete KYC to reach L3
+        </a>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- ── Product Grid ── -->
+  <div class="dashboard-section">
+    <h2 class="dashboard-section-title">Your Products</h2>
+    <div class="dashboard-products">
+      <% products.each do |key, product| %>
+        <% accessible = user[:auth_level] >= product[:min_level] %>
+        <div class="product-tile <%= accessible ? 'product-tile-active' : 'product-tile-locked' %>"
+             data-product="<%= key %>"
+             onclick="<%= accessible ? "execProduct('#{key}')" : "showUpgradeHint('#{product[:min_level]}')" %>">
+
+          <div class="product-tile-header">
+            <span class="product-tile-name"><%= product[:name] %></span>
+            <span class="product-tile-level level-badge <%= accessible ? "level-#{product[:min_level]}" : 'level-locked' %>">
+              L<%= product[:min_level] %>
+            </span>
+          </div>
+          <div class="product-tile-tech"><%= product[:tech] %></div>
+          <div class="product-tile-footer">
+            <% if accessible %>
+              <span class="product-status-dot status-online"></span>
+              <code class="product-cmd">/<%= key %></code>
+            <% else %>
+              <span class="product-status-dot status-locked"></span>
+              <span class="product-locked-label">Upgrade to L<%= product[:min_level] %></span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- ── Quick Actions ── -->
+  <div class="dashboard-section">
+    <h2 class="dashboard-section-title">Quick Actions</h2>
+    <div class="quick-actions">
+      <button class="quick-action-btn" onclick="runCmd('/status')">
+        <span class="qa-icon">📊</span>
+        <span class="qa-label">Status Check</span>
+        <code class="qa-cmd">/status</code>
+      </button>
+      <button class="quick-action-btn" onclick="runCmd('/voice --sub=status')">
+        <span class="qa-icon">📡</span>
+        <span class="qa-label">Voice Status</span>
+        <code class="qa-cmd">/voice --sub=status</code>
+      </button>
+      <button class="quick-action-btn" onclick="runCmd('/arbiter --sub=models')">
+        <span class="qa-icon">🤖</span>
+        <span class="qa-label">AI Models</span>
+        <code class="qa-cmd">/arbiter --sub=models</code>
+      </button>
+      <button class="quick-action-btn" onclick="runCmd('/help')">
+        <span class="qa-icon">❓</span>
+        <span class="qa-label">Help</span>
+        <code class="qa-cmd">/help</code>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── CLI Output Panel ── -->
+  <div class="dashboard-section">
+    <div class="cli-output-card">
+      <div class="cli-output-header">
+        <h3 class="card-title">&gt;_ Last CLI Output</h3>
+        <button class="btn btn-ghost btn-xs" onclick="clearOutput()">Clear</button>
+      </div>
+      <div id="cli-output-panel" class="cli-output-panel">
+        <div class="cli-output-placeholder">
+          <span class="t-muted">Run a command above to see output here...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Quick-run a command and show output in the CLI output panel
+function runCmd(command) {
+  const panel = document.getElementById('cli-output-panel');
+  panel.innerHTML = '<div class="cli-loading"><span class="t-muted">Executing: </span><code>' + command + '</code>…</div>';
+
+  fetch('/api/exec', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ command })
+  })
+  .then(r => r.json())
+  .then(data => {
+    panel.innerHTML = '<pre class="cli-output-json">' + syntaxHighlight(JSON.stringify(data, null, 2)) + '</pre>';
+    // Also push to terminal if open
+    if (!document.getElementById('terminal-overlay').classList.contains('hidden')) {
+      appendTerminalLine('$ lc ' + command + ' --json', 'cmd');
+      appendTerminalLine(JSON.stringify(data, null, 2), data.status === 'ok' ? 'ok' : 'err');
+    }
+  })
+  .catch(err => {
+    panel.innerHTML = '<div class="t-critical">Error: ' + err.message + '</div>';
+  });
+}
+
+function execProduct(key) {
+  runCmd('/' + key);
+  openTerminal();
+  document.getElementById('terminal-input').value = '/' + key;
+}
+
+function showUpgradeHint(level) {
+  const msg = { 2: '/settings/2fa', 3: '/settings/kyc', 4: 'Maintain 30-day active account' };
+  alert('Auth Level ' + level + ' required.\nRun: lc ' + (msg[level] || ''));
+}
+
+function clearOutput() {
+  document.getElementById('cli-output-panel').innerHTML =
+    '<div class="cli-output-placeholder"><span class="t-muted">Output cleared.</span></div>';
+}
+</script>

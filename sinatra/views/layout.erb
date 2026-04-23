@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LaunchCore Command<%= defined?(@page_title) ? " — #{@page_title}" : '' %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+</head>
+<body class="midnight-blurple">
+
+  <!-- Grid overlay -->
+  <div class="grid-overlay" aria-hidden="true"></div>
+
+  <!-- ── Navigation ── -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="navbar-inner">
+      <a href="<%= logged_in? ? '/dashboard' : '/' %>" class="navbar-brand">
+        <span class="brand-lc">lc</span>
+        <span class="brand-name">LaunchCore</span>
+        <span class="brand-badge">v<%= LaunchCore::VERSION %></span>
+      </a>
+
+      <div class="navbar-links">
+        <% if logged_in? %>
+          <span class="nav-user">
+            <span class="nav-level-badge level-<%= @current_user[:auth_level] %>">
+              L<%= @current_user[:auth_level] %>
+            </span>
+            <%= @current_user[:email] %>
+          </span>
+          <a href="/dashboard" class="nav-link">Dashboard</a>
+          <a href="/logout" class="nav-link nav-link-danger">Logout</a>
+        <% else %>
+          <a href="/login"  class="nav-link">Login</a>
+          <a href="/signup" class="btn btn-primary btn-sm">Get Started</a>
+        <% end %>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Flash message ── -->
+  <% if @flash %>
+    <div class="flash flash-success" role="alert">
+      <span class="flash-icon">✓</span>
+      <%= @flash %>
+      <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+    </div>
+  <% end %>
+
+  <!-- ── Main content ── -->
+  <main class="main-content">
+    <%= yield %>
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-brand">LaunchCore Command</span>
+      <span class="footer-divider">·</span>
+      <span>LaunchCloud Labs © 2026</span>
+      <span class="footer-divider">·</span>
+      <a href="https://launchcloudlabs.com" target="_blank" rel="noopener">launchcloudlabs.com</a>
+      <span class="footer-divider">·</span>
+      <span class="footer-status">
+        <span class="status-dot status-online"></span>
+        System Online
+      </span>
+    </div>
+  </footer>
+
+  <!-- ── Live Terminal Console Overlay ── -->
+  <div id="terminal-overlay" class="terminal-overlay hidden" role="dialog" aria-modal="true" aria-label="Live Terminal Console">
+    <div class="terminal-window">
+      <div class="terminal-titlebar">
+        <div class="terminal-dots">
+          <span class="dot dot-red" onclick="closeTerminal()"></span>
+          <span class="dot dot-yellow"></span>
+          <span class="dot dot-green"></span>
+        </div>
+        <span class="terminal-title">LaunchCore CLI — Live Terminal</span>
+        <button class="terminal-close-btn" onclick="closeTerminal()" aria-label="Close terminal">✕</button>
+      </div>
+      <div class="terminal-body">
+        <div id="terminal-output" class="terminal-output">
+          <div class="terminal-welcome">
+            <span class="t-green">LaunchCore Command</span> — Live Terminal Console<br/>
+            <span class="t-muted">Execute CLI commands below and see raw JSON output in real-time.</span>
+          </div>
+        </div>
+        <div class="terminal-input-row">
+          <span class="terminal-prompt">
+            <span class="t-blurple">[lc]</span>
+            <span class="t-green"><%= @current_user ? @current_user[:email] : 'guest' %></span>
+            <span class="t-cyan">→</span>
+          </span>
+          <input type="text"
+                 id="terminal-input"
+                 class="terminal-input"
+                 placeholder="/status"
+                 autocomplete="off"
+                 autocorrect="off"
+                 spellcheck="false"
+                 aria-label="CLI command input" />
+          <button class="terminal-send-btn" onclick="terminalExec()" aria-label="Execute">⏎</button>
+        </div>
+        <div class="terminal-hints">
+          <span class="t-muted">Try: </span>
+          <button class="terminal-hint" onclick="setTermCmd('/status')">
+            /status
+          </button>
+          <button class="terminal-hint" onclick="setTermCmd('/help')">
+            /help
+          </button>
+          <button class="terminal-hint" onclick="setTermCmd('/voice --sub=status')">
+            /voice
+          </button>
+          <button class="terminal-hint" onclick="setTermCmd('/neobank')">
+            /neobank
+          </button>
+          <button class="terminal-hint" onclick="setTermCmd('/arbiter --sub=models')">
+            /arbiter
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Terminal Toggle FAB ── -->
+  <% if logged_in? %>
+    <button class="terminal-fab" onclick="toggleTerminal()" aria-label="Open Live Terminal" title="Live CLI Terminal">
+      <span class="terminal-fab-icon">&gt;_</span>
+    </button>
+  <% end %>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

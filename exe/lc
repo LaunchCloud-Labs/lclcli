@@ -1,0 +1,83 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# LaunchCore Command — Main Binary
+# Usage: lc [command] [--option=value] [--json]
+#
+# Examples:
+#   lc                          # Start interactive REPL
+#   lc /auth/login              # Login interactively
+#   lc /auth/login --email=a@b.com --password=pass --json
+#   lc /status --json
+#   lc /voice --sub=status --json
+#   lc setup                    # Generate RS256 keys and initialize DB
+
+$LOAD_PATH.unshift(File.expand_path('../lib', __dir__))
+
+require 'optparse'
+require 'launchcore'
+
+# ─── Global flags ────────────────────────────────────────────────────
+options = { json: false, command: nil }
+
+# Strip --json before OptionParser sees it, to allow passing to dispatcher
+if ARGV.delete('--json')
+  options[:json] = true
+  LaunchCore::Output.json_mode = true
+end
+
+# ─── Boot ─────────────────────────────────────────────────────────────
+begin
+  LaunchCore.boot!
+rescue StandardError => e
+  if options[:json]
+    $stdout.puts JSON.generate({ status: 'boot_error', message: e.message })
+  else
+    warn "\e[31m[FATAL]\e[0m #{e.message}"
+  end
+  exit(1)
+end
+
+# ─── Dispatch ─────────────────────────────────────────────────────────
+if ARGV.empty?
+  # Interactive REPL mode
+  LaunchCore::CLI::REPL.new.run
+elsif ARGV.first == 'setup'
+  LaunchCore::Auth::JWTManager.generate_keys!
+  LaunchCore::Output.success('LaunchCore setup complete.')
+  LaunchCore::Output.info("Keys: #{LaunchCore::Config::KEYS_DIR}")
+  LaunchCore::Output.info("DB:   #{LaunchCore::Config::DB_PATH}")
+elsif ARGV.first == 'version'
+  if options[:json]
+    $stdout.puts JSON.generate({
+                                 version: LaunchCore::VERSION,
+                                 codename: LaunchCore::CODENAME,
+                                 build: LaunchCore::BUILD_DATE
+                               })
+  else
+    $stdout.puts "LaunchCore Command v#{LaunchCore::VERSION} \"#{LaunchCore::CODENAME}\" (#{LaunchCore::BUILD_DATE})"
+  end
+else
+  # Non-interactive single-command mode (used by Sinatra bridge)
+  session = LaunchCore::Auth::Session.new
+  session.auto_resume
+  dispatcher = LaunchCore::CLI::Dispatcher.new(session)
+
+  begin
+    dispatcher.dispatch(ARGV.join(' '))
+  rescue LaunchCore::Auth::AuthError => e
+    if options[:json]
+      $stdout.puts JSON.generate({ status: 'auth_error', message: e.message })
+    else
+      LaunchCore::Output.critical(e.message)
+      exit(1)
+    end
+  rescue StandardError => e
+    if options[:json]
+      $stdout.puts JSON.generate({ status: 'error', message: e.message })
+    else
+      LaunchCore::Output.critical(e.message)
+      exit(1)
+    end
+  end
+end

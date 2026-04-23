@@ -1,0 +1,14 @@
+<% @page_title = @code.to_s %>
+<div class="error-page">
+  <div class="error-card">
+    <div class="error-code"><%= @code || 500 %></div>
+    <h1 class="error-title"><%= @message || 'Something went wrong' %></h1>
+    <p class="error-sub">The LaunchCore CLI is still operational. Try using the terminal below.</p>
+    <div class="error-actions">
+      <a href="/" class="btn btn-primary">Back to Home</a>
+      <% if logged_in? %>
+        <a href="/dashboard" class="btn btn-ghost">Dashboard</a>
+      <% end %>
+    </div>
+  </div>
+</div>

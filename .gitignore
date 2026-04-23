@@ -1,0 +1,8 @@
+db/*.db
+data/*.db
+data/keys/*
+coverage/
+*.log
+.lcl_session
+node_modules/
+vendor/

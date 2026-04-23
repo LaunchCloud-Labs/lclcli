@@ -1,0 +1,156 @@
+<% @page_title = 'Create Account' %>
+
+<div class="auth-page">
+  <div class="auth-card auth-card-wide">
+    <div class="auth-card-header">
+      <a href="/" class="auth-logo"><span class="brand-lc">lc</span></a>
+      <h1 class="auth-title">Create Account</h1>
+      <p class="auth-subtitle">Join the LaunchCore platform</p>
+    </div>
+
+    <% if @error %>
+      <div class="alert alert-error" role="alert">
+        <span class="alert-icon">✗</span>
+        <%= @error %>
+      </div>
+    <% end %>
+
+    <!-- Placeholder Payment Notice -->
+    <div class="alert alert-info">
+      <span class="alert-icon">ℹ</span>
+      <strong>Beta:</strong> Card information collected below is <strong>not stored or charged</strong>.
+      This is a placeholder for the billing integration.
+    </div>
+
+    <form class="auth-form" action="/signup" method="POST" novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="first_name">First Name</label>
+          <input type="text" id="first_name" name="first_name" class="form-input"
+                 placeholder="John" required autocomplete="given-name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="last_name">Last Name</label>
+          <input type="text" id="last_name" name="last_name" class="form-input"
+                 placeholder="Smith" required autocomplete="family-name" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <input type="email" id="email" name="email" class="form-input"
+               placeholder="you@company.com" required autocomplete="email" autofocus />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="phone">Phone <span class="form-label-opt">(optional)</span></label>
+        <input type="tel" id="phone" name="phone" class="form-input"
+               placeholder="+1 (321) 555-0100" autocomplete="tel" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="invite_code">Invite Code <span class="form-label-opt">(optional)</span></label>
+        <input type="text" id="invite_code" name="invite_code" class="form-input"
+               placeholder="LCI-XXXXXXXXXXXXXXXX" autocomplete="off"
+               style="font-family: var(--font-mono);" />
+      </div>
+
+      <!-- Placeholder Payment Card -->
+      <div class="payment-section">
+        <h3 class="payment-title">
+          <span class="payment-badge">PLACEHOLDER</span>
+          Payment Information
+        </h3>
+        <div class="form-group">
+          <label class="form-label" for="card_number">Card Number</label>
+          <input type="text" id="card_number" name="card_number" class="form-input"
+                 placeholder="4242 4242 4242 4242" maxlength="19"
+                 oninput="formatCard(this)" autocomplete="cc-number" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="card_expiry">Expiry</label>
+            <input type="text" id="card_expiry" name="card_expiry" class="form-input"
+                   placeholder="MM/YY" maxlength="5" autocomplete="cc-exp" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="card_cvv">CVV</label>
+            <input type="password" id="card_cvv" name="card_cvv" class="form-input"
+                   placeholder="•••" maxlength="4" autocomplete="cc-csc" />
+          </div>
+        </div>
+        <p class="payment-note">
+          🔒 Beta: This data is not transmitted or stored. Live billing activates at GA release.
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <div class="input-group">
+          <input type="password" id="password" name="password" class="form-input"
+                 placeholder="Min 12 chars, upper+lower+digit+symbol" required
+                 autocomplete="new-password" oninput="checkStrength(this.value)" />
+          <button type="button" class="input-toggle" onclick="togglePassword('password')" aria-label="Toggle">👁</button>
+        </div>
+        <div class="password-strength" id="strength-bar" role="progressbar"></div>
+        <p class="form-hint" id="strength-label"></p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password_confirm">Confirm Password</label>
+        <input type="password" id="password_confirm" name="password_confirm" class="form-input"
+               placeholder="Re-enter password" required autocomplete="new-password" />
+      </div>
+
+      <div class="form-check">
+        <input type="checkbox" id="terms" class="form-check-input" required />
+        <label class="form-check-label" for="terms">
+          I agree to the <a href="https://launchcloudlabs.com/terms" class="auth-link" target="_blank">Terms of Service</a>
+          and <a href="https://launchcloudlabs.com/privacy" class="auth-link" target="_blank">Privacy Policy</a>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full btn-lg">
+        Create My Account
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a href="/login" class="auth-link">Sign in →</a></p>
+    </div>
+
+    <div class="cli-equivalent">
+      <span class="cli-eq-label">CLI equivalent</span>
+      <code class="cli-eq-cmd">lc /auth/signup</code>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePassword(id) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+function formatCard(input) {
+  let v = input.value.replace(/\D/g, '').substring(0, 16);
+  input.value = v.replace(/(.{4})/g, '$1 ').trim();
+}
+
+function checkStrength(password) {
+  const bar   = document.getElementById('strength-bar');
+  const label = document.getElementById('strength-label');
+  let score   = 0;
+  if (password.length >= 12) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[a-z]/.test(password)) score++;
+  if (/\d/.test(password)) score++;
+  if (/\W/.test(password)) score++;
+  const levels = ['', 'Very Weak', 'Weak', 'Fair', 'Strong', 'Very Strong'];
+  const colors = ['', '#FF3131', '#FF3131', '#FFBF00', '#00FF41', '#00FF41'];
+  bar.style.width = (score * 20) + '%';
+  bar.style.background = colors[score] || 'transparent';
+  label.textContent = password ? levels[score] || '' : '';
+  label.style.color = colors[score] || '';
+}
+</script>

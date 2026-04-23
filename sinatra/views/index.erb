@@ -1,0 +1,101 @@
+<% @page_title = 'Home' %>
+
+<!-- ── Hero Section ── -->
+<section class="hero">
+  <div class="hero-glow hero-glow-left" aria-hidden="true"></div>
+  <div class="hero-glow hero-glow-right" aria-hidden="true"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      CLI-First · Zero-Trust · Production-Grade
+    </div>
+
+    <pre class="hero-ascii" aria-label="LaunchCore ASCII logo">
+ ██╗      ██████╗
+ ██║     ██╔════╝
+ ██║     ██║
+ ██║     ██║
+ ███████╗╚██████╗
+ ╚══════╝ ╚═════╝</pre>
+
+    <h1 class="hero-title">
+      LaunchCore <span class="text-blurple">Command</span>
+    </h1>
+    <p class="hero-subtitle">
+      The unified platform for voice, tunnel, neobanking, AI, and beyond.<br/>
+      One CLI. Eleven products. Infinite scale.
+    </p>
+
+    <div class="hero-actions">
+      <a href="/signup" class="btn btn-primary btn-lg">
+        <span>Get Started Free</span>
+        <span class="btn-arrow">→</span>
+      </a>
+      <a href="/login" class="btn btn-ghost btn-lg">Sign In</a>
+    </div>
+
+    <!-- CLI demo strip -->
+    <div class="cli-demo">
+      <div class="cli-demo-bar">
+        <span class="dot dot-red"></span>
+        <span class="dot dot-yellow"></span>
+        <span class="dot dot-green"></span>
+        <span class="cli-demo-title">LaunchCore CLI</span>
+      </div>
+      <div class="cli-demo-body">
+        <div class="cli-line"><span class="t-blurple">[lc]</span> <span class="t-muted">guest →</span> <span class="t-white">/auth/login</span></div>
+        <div class="cli-line"><span class="t-cyan">  ›</span> <span class="t-muted">Email:</span> <span class="t-white">admin@launchcloudlabs.com</span></div>
+        <div class="cli-line"><span class="t-cyan">  ›</span> <span class="t-muted">Password:</span> <span class="t-white">••••••••••••</span></div>
+        <div class="cli-line"><span class="t-green">  ✓</span> <span class="t-white">Welcome back! Auth Level: L4</span></div>
+        <div class="cli-line cli-cursor"><span class="t-blurple">[lc]</span> <span class="t-green">admin@... L4 →</span> <span class="cursor">█</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Product Stack Grid ── -->
+<section class="products-section">
+  <div class="section-header">
+    <h2 class="section-title">The 11-Product Stack</h2>
+    <p class="section-subtitle">$10/month. Unlimited access. CLI-first architecture.</p>
+  </div>
+
+  <div class="products-grid">
+    <% products.each_with_index do |(key, product), idx| %>
+      <div class="product-card">
+        <div class="product-number">0<%= idx + 1 %></div>
+        <div class="product-icon"><%= product_icon(key) rescue '⬡' %></div>
+        <h3 class="product-name"><%= product[:name] %></h3>
+        <p class="product-tech"><%= product[:tech] %></p>
+        <div class="product-meta">
+          <span class="product-level">L<%= product[:min_level] %>+</span>
+          <span class="product-cmd"><code>/<%=key%></code></span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</section>
+
+<!-- ── Auth Level Ladder ── -->
+<section class="auth-section">
+  <div class="section-header">
+    <h2 class="section-title">4-Tier Auth Architecture</h2>
+    <p class="section-subtitle">Progressive trust. Zero-assumption security.</p>
+  </div>
+
+  <div class="auth-ladder">
+    <% auth_levels.each do |level, label| %>
+      <div class="auth-step auth-step-<%= level %>">
+        <div class="auth-step-number">L<%= level %></div>
+        <div class="auth-step-content">
+          <h4 class="auth-step-label"><%= label %></h4>
+          <p class="auth-step-desc"><%= auth_level_desc(level) rescue '' %></p>
+        </div>
+        <div class="auth-step-indicator"></div>
+      </div>
+    <% end %>
+  </div>
+</section>
+
+

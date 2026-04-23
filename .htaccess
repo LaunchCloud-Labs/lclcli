@@ -1,0 +1,12 @@
+# LaunchCore — Phusion Passenger + Apache config
+# Enables the Sinatra/Rack app at this subdirectory
+
+PassengerEnabled on
+PassengerAppRoot /home/Gcolonna/public_html/lclcli
+
+# Allow the app to boot
+PassengerMinInstances 1
+PassengerMaxRequests 1000
+
+# Don't serve .rb/.ru as static files
+Options -MultiViews
