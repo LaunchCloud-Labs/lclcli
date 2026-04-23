@@ -3,7 +3,7 @@ require 'readline'
 module LaunchCore
   module CLI
     class REPL
-      COMMANDS = %w[/help /status /payroll /auth/login /auth/signup /settings /admin /robot /ai /exit]
+      COMMANDS = %w[/ask /help /status /payroll /auth/login /auth/signup /settings /admin /robot /ai /exit]
 
       def initialize
         @session = Auth::Session.new

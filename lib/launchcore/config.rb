@@ -68,6 +68,7 @@ module LaunchCore
       workforce: { name: 'Workforce Module',      tech: 'Recruitment Engine',               min_class: :company,
                    min_level: 2 },
       scheduler: { name: 'The Scheduler',         tech: 'Credential Kill-Switch',           min_class: :any,
+      timeclock: { name: 'Command-TimeClock', min_level: 1, tech: 'SQLite / Time-Tracking' },
                    min_level: 2 },
       neobank: { name: 'Neobank + DWR', tech: 'Programmable Banking / Mercury / Lithic', min_class: :any,
                  min_level: 3 },
