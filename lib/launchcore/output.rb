@@ -15,6 +15,7 @@ module LaunchCore
       def warning(msg) ; puts "  \e[33m⚠\e[0m #{msg}" ; end
       def critical(msg); puts "  \e[31m✘\e[0m #{msg}" ; end
       def separator    ; puts "\e[90m" + "─" * 60 + "\e[0m" ; end
+      def blank; puts; end
       
       def splash
         puts "\e[36m\e[1m"
