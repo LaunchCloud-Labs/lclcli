@@ -221,6 +221,39 @@ class LaunchCoreApp < Sinatra::Base
     erb :dashboard
   end
 
+  # ─── Routes: God Mode (Admin) ─────────────────────────────────────────
+  get '/godmode' do
+    require_login!
+    user = current_web_user
+    unless user[:email].end_with?('@launchcloudlabs.com') || user[:user_class] == 'administrator'
+      halt 403, erb(:error, locals: { message: 'God Mode restricted to LCL Administrators.' })
+    end
+    
+    @companies = LaunchCore::Database::Models.companies.all
+    @users = LaunchCore::Database::Models.users.all
+    @sessions = LaunchCore::Database::Models.sessions.where(revoked: 0).all
+    
+    erb :godmode
+  end
+
+  post '/api/godmode/kill' do
+    content_type :json
+    require_login_or_401!
+    user = current_web_user
+    unless user[:email].end_with?('@launchcloudlabs.com') || user[:user_class] == 'administrator'
+      halt 403, JSON.generate({ status: 'error', message: 'Forbidden' })
+    end
+
+    data = JSON.parse(request.body.read, symbolize_names: true)
+    jti = data[:jti]
+    if jti
+      LaunchCore::Auth::JWTManager.revoke!(jti)
+      JSON.generate({ status: 'ok', message: "Session #{jti} revoked." })
+    else
+      JSON.generate({ status: 'error', message: 'Missing jti' })
+    end
+  end
+
   # ─── Routes: API / CLI Bridge ─────────────────────────────────────────
   # POST /api/exec  — executes lc [command] --json on behalf of logged-in user
   # Body: { "command": "/voice --sub=status" }
@@ -260,6 +293,26 @@ class LaunchCoreApp < Sinatra::Base
                     time: Time.now.utc.iso8601,
                     authenticated: logged_in?
                   })
+  end
+
+  # POST /api/audit — endpoint for Spokes to push centralized audit logs
+  post '/api/audit' do
+    content_type :json
+    begin
+      data = JSON.parse(request.body.read, symbolize_names: true)
+      LaunchCore::Database::Models.log(
+        user_id: data[:user_id],
+        action: data[:action],
+        resource: data[:resource],
+        status: data[:status] || 'success',
+        metadata: data[:metadata] || {},
+        ip: request.ip
+      )
+      JSON.generate({ status: 'ok' })
+    rescue => e
+      status 500
+      JSON.generate({ status: 'error', message: e.message })
+    end
   end
 
   # GET /api/public_key — exposes RS256 public key for Spokes to verify JWTs

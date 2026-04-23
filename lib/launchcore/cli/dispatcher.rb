@@ -42,6 +42,7 @@ module LaunchCore
         when '/arbiter'        then dispatch_product(:arbiter, args)
         when '/admin'          then cmd_admin(args)
         when '/robot'          then cmd_robot(args)
+        when '/update'         then cmd_update(args)
         else
           result = { status: 'error', message: "Unknown command: #{command}. Try /help" }
           return Output.json_response(**result) if Output.json_mode
@@ -577,6 +578,26 @@ module LaunchCore
         else
           Output.info('Usage: /robot --sync=SLUG [--json]')
         end
+      end
+
+      def cmd_update(_args)
+        Output.header('Over-The-Air Update (OTA)')
+        Output.info('Checking for Hub and Spoke updates from GitHub...')
+        
+        # Perform git pull on Hub and Spokes if they exist
+        ['lclcli', 'lcl-payroll', 'LCL-TimeClock'].each do |repo|
+          path = File.expand_path("~/projects/#{repo}")
+          if File.directory?(path)
+            Output.info("Updating #{repo}...")
+            res = `cd #{path} && git pull origin master 2>&1 || git pull origin main 2>&1`
+            if $?.success?
+              Output.success("#{repo} updated: #{res.strip.lines.last.strip}")
+            else
+              Output.warning("#{repo} update failed: #{res.strip}")
+            end
+          end
+        end
+        Output.success("OTA Update Complete. Please restart the CLI.")
       end
       # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/PerceivedComplexity
 

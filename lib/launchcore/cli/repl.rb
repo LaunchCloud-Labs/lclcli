@@ -3,7 +3,7 @@ require 'readline'
 module LaunchCore
   module CLI
     class REPL
-      COMMANDS = %w[/ask /help /status /payroll /auth/login /auth/signup /settings /admin /robot /ai /exit]
+      COMMANDS = %w[/ask /help /status /payroll /auth/login /auth/signup /settings /admin /robot /update /ai /exit]
 
       def initialize
         @session = Auth::Session.new
@@ -13,6 +13,9 @@ module LaunchCore
 
       def run
         LaunchCore::Output.splash
+        
+        # Display the help menu immediately upon boot
+        @dispatcher.dispatch('/help')
         
         # Setup tab completion
         comp = proc { |s| COMMANDS.grep(/^#{Regexp.escape(s)}/) }

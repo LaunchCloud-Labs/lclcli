@@ -1,0 +1,86 @@
+<% @page_title = 'God Mode' %>
+
+<div class="dashboard">
+  <div class="dashboard-header">
+    <div class="dashboard-greeting">
+      <h1>
+        <span class="text-blurple">God Mode</span> | LCL Administration
+      </h1>
+      <p class="dashboard-subtitle">
+        Global Tenant & JWT Kill Switch Control
+      </p>
+    </div>
+  </div>
+
+  <div class="dashboard-section">
+    <h2 class="dashboard-section-title">Active JWT Sessions</h2>
+    <table class="table" style="width: 100%; border-collapse: collapse; background: #fff; padding: 10px; border-radius: 8px;">
+      <thead>
+        <tr style="text-align: left; border-bottom: 1px solid #eee;">
+          <th>User ID</th>
+          <th>JTI (Session Token ID)</th>
+          <th>Created</th>
+          <th>Expires</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @sessions.each do |s| %>
+          <tr>
+            <td><%= s[:user_id] %></td>
+            <td><code><%= s[:jti][0..15] %>...</code></td>
+            <td><%= s[:created_at] %></td>
+            <td><%= s[:expires_at] %></td>
+            <td>
+              <button onclick="killSession('<%= s[:jti] %>')" style="background: red; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px;">Kill Switch</button>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="dashboard-section" style="margin-top: 30px;">
+    <h2 class="dashboard-section-title">Provisioned Companies</h2>
+    <table class="table" style="width: 100%; border-collapse: collapse; background: #fff; padding: 10px; border-radius: 8px;">
+      <thead>
+        <tr style="text-align: left; border-bottom: 1px solid #eee;">
+          <th>Slug</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Entitlements</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @companies.each do |c| %>
+          <tr>
+            <td><strong><%= c[:slug] %></strong></td>
+            <td><%= c[:name] %></td>
+            <td><span style="color: green;"><%= c[:status] %></span></td>
+            <td><code><%= c[:entitlements] %></code></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function killSession(jti) {
+  if (!confirm("Are you sure you want to instantly revoke this user's token across the entire cluster?")) return;
+  fetch('/api/godmode/kill', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jti: jti })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.status === 'ok') {
+      alert("Token revoked.");
+      location.reload();
+    } else {
+      alert("Error: " + data.message);
+    }
+  });
+}
+</script>
