@@ -5,7 +5,7 @@ module LaunchCore
     # Product 11: Arbiter AI — Multi-model AI Router (Gemini / Claude / xAI)
     class Arbiter < Base
       # rubocop:disable Layout/LineLength
-      GEMINI_KEY  = ENV.fetch('GEMINI_API_KEY',  'AIzaSyBeJDGsaPp1XlcmGGTw7NsWKwNHpJIg1dU')
+      GEMINI_KEY  = ENV.fetch('GEMINI_API_KEY',  'AIzaSyAuL800R8jdn1zYIkv9JL1QH5rF0lG-RUU')
       XAI_KEY     = ENV.fetch('XAI_API_KEY',     nil)
       CLAUDE_KEY  = ENV.fetch('ANTHROPIC_API_KEY', nil)
       # rubocop:enable Layout/LineLength

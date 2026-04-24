@@ -45,6 +45,26 @@ module LaunchCore
         puts "        #{MUTED}Sovereign Business Operating System#{RESET}"
         puts "  " + "#{BLUE}━" * 60 + "#{RESET}"
       end
+
+      def display_help
+        header("LaunchCore Help")
+        primary("Available Commands:")
+        puts "  /status              Show auth status"
+        puts "  /auth/login          Login"
+        puts "  /auth/signup         Sign up"
+        puts "  /auth/logout         Logout"
+        puts "  /auth/invite         Generate invite code"
+        puts "  /settings            Settings menu"
+        puts "  /admin               Admin commands"
+        puts "  /robot               Robot commands"
+        puts "  /update              Update systems"
+        puts "  /godmode             Admin view"
+        blank
+        primary("Spokes:")
+        puts "  /voice, /tunnel, /portal, /meetings, /scheduler, /arbiter"
+        puts "  /payroll, /timeclock, /employee"
+        blank
+      end
     end
   end
 end

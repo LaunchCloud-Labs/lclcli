@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+require 'fileutils'
+
+PUB_KEY = File.expand_path('~/.lcl_keys/public.pem')
+WEB_PATH = File.expand_path('../public/security/keys/public.pem', __dir__)
+
+unless File.exist?(PUB_KEY)
+  puts "Error: Public key not found at #{PUB_KEY}"
+  exit(1)
+end
+
+FileUtils.mkdir_p(File.dirname(WEB_PATH))
+FileUtils.cp(PUB_KEY, WEB_PATH)
+
+puts "Public key deployed to #{WEB_PATH}"
+puts "Available at: https://launchcloudlabs.com/security/keys/public.pem (if synced to production)"

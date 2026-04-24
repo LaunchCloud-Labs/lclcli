@@ -91,7 +91,8 @@ class LaunchCoreApp < Sinatra::Base
       icons = {
         voice: '📡', tunnel: '🔒', portal: '🏛', meetings: '🎥',
         workforce: '👥', scheduler: '⏱', neobank: '🏦', brinkspay: '💳',
-        tradeshield: '🛡', stophold: '✈', arbiter: '🤖'
+        tradeshield: '🛡', stophold: '✈', arbiter: '🤖',
+        payroll: '💰', timeclock: '⏳', employee: '👤'
       }
       icons[key] || '⬡'
     end
@@ -268,6 +269,7 @@ class LaunchCoreApp < Sinatra::Base
     # Security: whitelist allowed command prefixes
     allowed_prefixes = %w[/status /help /voice /tunnel /portal /meetings /workforce
                           /scheduler /neobank /brinkspay /tradeshield /stophold /arbiter
+                          /payroll /timeclock /employee
                           /auth/invite /settings/2fa /settings/kyc /settings/profile]
 
     unless allowed_prefixes.any? { |p| command.start_with?(p) }
